@@ -1,0 +1,57 @@
+import React, { useState, useRef } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import QRCode from "qrcode.react";
+
+export default function QRCodeGenerator() {
+  const [link, setLink] = useState("");
+  const [generated, setGenerated] = useState(false);
+  const canvasRef = useRef(null);
+
+  const downloadQR = () => {
+    const canvas = canvasRef.current.querySelector("canvas");
+    const pngUrl = canvas.toDataURL("image/png", 1.0);
+    const downloadLink = document.createElement("a");
+    downloadLink.href = pngUrl;
+    downloadLink.download = "qr-code.png";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+      <h1 className="text-3xl font-bold mb-6">QR Code Generator</h1>
+
+      <Card className="w-full max-w-md shadow-xl rounded-2xl">
+        <CardContent className="p-6 flex flex-col gap-4">
+          <Input
+            type="text"
+            placeholder="Enter URL here"
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+          />
+          <Button
+            onClick={() => setGenerated(true)}
+            disabled={!link.trim()}
+            className="rounded-2xl"
+          >
+            Generate QR Code
+          </Button>
+          {generated && (
+            <div className="flex flex-col items-center mt-4 gap-4">
+              <div ref={canvasRef} className="bg-white p-4 rounded-xl shadow-md">
+                <QRCode value={link} size={300} includeMargin={true} />
+              </div>
+              <Button onClick={downloadQR} className="rounded-2xl">
+                Download QR Code
+              </Button>
+              <div className="text-sm text-gray-500">Preview above, 300x300 px</div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
